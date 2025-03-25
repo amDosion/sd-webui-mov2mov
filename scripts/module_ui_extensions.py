@@ -1,7 +1,6 @@
-import gradio
+import gradio as gr
 from modules import script_callbacks, ui_components
 from scripts import m2m_hook as patches
-
 
 elem_ids = []
 
@@ -17,7 +16,6 @@ def fix_elem_id(component, **kwargs):
     else:
         elem_id = elem_id + "_" + str(elem_ids.count(elem_id))
         elem_ids.append(elem_id)
-
     return elem_id
 
 
@@ -41,9 +39,16 @@ def InputAccordion_init(self, *args, **kwargs):
     return res
 
 
+# ✅ Gradio 兼容适配（处理不同版本导入路径）
+try:
+    IOComponentClass = gr.IOComponent
+except AttributeError:
+    import gradio.components
+    IOComponentClass = gradio.components.IOComponent
+
 original_IOComponent_init = patches.patch(
     __name__,
-    obj=gradio.components.IOComponent,
+    obj=IOComponentClass,
     field="__init__",
     replacement=IOComponent_init,
 )
